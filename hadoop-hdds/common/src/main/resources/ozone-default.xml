@@ -3008,6 +3008,17 @@
     </description>
   </property>
   <property>
+    <name>ozone.client.wait.between.random.retries.enabled</name>
+    <value>false</value>
+    <description>
+      When retrying to contact the OM, whether to randomly select the retry time
+      within the interval. If true, the time will be randomly selected within
+      the target interval; if false, refer to the product of
+      {ozone.client.wait.between.retries.millis} and
+      {ozone.client.failover.max.attempts}.
+    </description>
+  </property>
+  <property>
     <name>ozone.om.admin.protocol.max.retries</name>
     <value>20</value>
     <tag>OM, MANAGEMENT</tag>

@@ -41,8 +41,11 @@ import org.apache.ozone.test.GenericTestUtils;
 import org.junit.jupiter.api.Test;
 import org.slf4j.event.Level;
 
+import static org.apache.hadoop.ozone.OzoneConfigKeys.OZONE_CLIENT_WAIT_BETWEEN_RETRIES_RANDOM_KEY;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Tests OM failover protocols using a Mock Failover provider and a Mock OM
@@ -52,6 +55,31 @@ public class TestOMFailovers {
 
   private ConfigurationSource conf = new OzoneConfiguration();
   private Exception testException;
+
+  @Test
+  public void testWaitTime() throws Exception {
+    OzoneConfiguration tmpConf = new OzoneConfiguration();
+    tmpConf.setBoolean(OZONE_CLIENT_WAIT_BETWEEN_RETRIES_RANDOM_KEY, true);
+    MockFailoverProxyProvider failoverProxyProvider1 =
+        new MockFailoverProxyProvider(tmpConf);
+    assertEquals(0, failoverProxyProvider1.getWaitTime());
+    String nodeId1 = (String) failoverProxyProvider1.getOMProxyMap()
+        .keySet().toArray()[0];
+    failoverProxyProvider1.setNextOmProxy(nodeId1);
+    assertTrue(failoverProxyProvider1.getWaitTime() > 0);
+    assertTrue(failoverProxyProvider1.getWaitTime() > 0);
+
+    tmpConf.setBoolean(OZONE_CLIENT_WAIT_BETWEEN_RETRIES_RANDOM_KEY, false);
+    MockFailoverProxyProvider failoverProxyProvider2 =
+        new MockFailoverProxyProvider(tmpConf);
+    assertEquals(0, failoverProxyProvider2.getWaitTime());
+    String nodeId2 = (String) failoverProxyProvider2.getOMProxyMap()
+        .keySet().toArray()[0];
+    failoverProxyProvider2.setNextOmProxy(nodeId2);
+    assertEquals(2000, failoverProxyProvider2.getWaitTime());
+    assertEquals(4000, failoverProxyProvider2.getWaitTime());
+    assertEquals(6000, failoverProxyProvider2.getWaitTime());
+  }
 
   @Test
   public void testAccessContorlExceptionFailovers() throws Exception {

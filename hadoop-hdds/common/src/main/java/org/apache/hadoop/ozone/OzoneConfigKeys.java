@@ -496,6 +496,9 @@ public final class OzoneConfigKeys {
       "ozone.client.wait.between.retries.millis";
   public static final long OZONE_CLIENT_WAIT_BETWEEN_RETRIES_MILLIS_DEFAULT =
       2000;
+  public static final String OZONE_CLIENT_WAIT_BETWEEN_RETRIES_RANDOM_KEY =
+      "ozone.client.wait.between.random.retries.enabled";
+  public static final boolean OZONE_CLIENT_WAIT_BETWEEN_RETRIES_RANDOM_DEFAULT = false;
 
   public static final String OZONE_FREON_HTTP_ENABLED_KEY =
       "ozone.freon.http.enabled";

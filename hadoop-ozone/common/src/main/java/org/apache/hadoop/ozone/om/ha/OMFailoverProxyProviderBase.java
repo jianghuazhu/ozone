@@ -84,6 +84,7 @@ public abstract class OMFailoverProxyProviderBase<T> implements
   private final long waitBetweenRetries;
   private Set<String> accessControlExceptionOMs = new HashSet<>();
   private boolean performFailoverDone;
+  private boolean randomRetryEnable;
 
   public OMFailoverProxyProviderBase(ConfigurationSource configuration,
                                      String omServiceId,
@@ -96,6 +97,9 @@ public abstract class OMFailoverProxyProviderBase<T> implements
     waitBetweenRetries = conf.getLong(
         OzoneConfigKeys.OZONE_CLIENT_WAIT_BETWEEN_RETRIES_MILLIS_KEY,
         OzoneConfigKeys.OZONE_CLIENT_WAIT_BETWEEN_RETRIES_MILLIS_DEFAULT);
+    randomRetryEnable = conf.getBoolean(
+        OzoneConfigKeys.OZONE_CLIENT_WAIT_BETWEEN_RETRIES_RANDOM_KEY,
+        OzoneConfigKeys.OZONE_CLIENT_WAIT_BETWEEN_RETRIES_RANDOM_DEFAULT);
 
     loadOMClientConfigs(conf, omServiceId);
     Preconditions.checkNotNull(omProxies);
@@ -335,7 +339,12 @@ public abstract class OMFailoverProxyProviderBase<T> implements
 
       // The same OM will be contacted again. So wait and then retry.
       numAttemptsOnSameOM++;
-      return (waitBetweenRetries * numAttemptsOnSameOM);
+      long waitTime = waitBetweenRetries * numAttemptsOnSameOM;
+      if (randomRetryEnable) {
+        waitTime = (long) (Math.random() * waitTime);
+        return waitTime > 0 ? waitTime : waitBetweenRetries;
+      }
+      return waitTime;
     }
     // Reset numAttemptsOnSameOM as we failed over to a different OM.
     numAttemptsOnSameOM = 0;
